@@ -20,6 +20,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Reflection;
 using NUglify.Helpers;
 using NUglify.JavaScript.Syntax;
@@ -3958,7 +3959,7 @@ namespace NUglify.JavaScript
                 case JSToken.BigIntLiteral:
                     {
                         SourceContext numericContext = m_currentToken.Clone();
-                        double bigIntValue;
+                        BigInteger bigIntValue;
                         if (ConvertBigIntLiteralToBigInteger(m_currentToken.Code, out bigIntValue) && false)
                         {
                             // conversion worked fine
@@ -5026,8 +5027,7 @@ namespace NUglify.JavaScript
                     break;
 
                 case JSToken.BigIntLiteral:
-                    double bigIntValue;
-                    if (ConvertBigIntLiteralToBigInteger(m_currentToken.Code, out bigIntValue) && false)
+                    if (ConvertBigIntLiteralToBigInteger(m_currentToken.Code, out var bigIntValue) && false)
                     {
                         // conversion worked fine
                         field = new ObjectLiteralField(bigIntValue, PrimitiveType.Number, m_currentToken.Clone());
@@ -5534,7 +5534,7 @@ namespace NUglify.JavaScript
                             }
 
                             // parse the number as a hex integer, converted to a double
-                            doubleValue = (double)System.Convert.ToInt64(str, 16);
+                            doubleValue = System.Convert.ToInt64(str, 16);
                         }
                         else if (str[1] == 'o' || str[1] == 'O')
                         {
@@ -5546,7 +5546,7 @@ namespace NUglify.JavaScript
                             }
 
                             // parse the number as an octal integer without the prefix, converted to a double
-                            doubleValue = (double)System.Convert.ToInt64(str.Substring(2), 8);
+                            doubleValue = System.Convert.ToInt64(str.Substring(2), 8);
                         }
                         else if (str[1] == 'b' || str[1] == 'B')
                         {
@@ -5558,7 +5558,7 @@ namespace NUglify.JavaScript
                             }
 
                             // parse the number as a binary integer without the prefix, converted to a double
-                            doubleValue = (double)System.Convert.ToInt64(str.Substring(2), 2);
+                            doubleValue = System.Convert.ToInt64(str.Substring(2), 2);
                         }
                         else
                         {
@@ -5566,7 +5566,7 @@ namespace NUglify.JavaScript
                             // and if it fails, just convert to decimal
                             try
                             {
-                                doubleValue = (double)System.Convert.ToInt64(str, 8);
+                                doubleValue = System.Convert.ToInt64(str, 8);
 
                                 // if we got here, we successfully converted it to octal.
                                 // now, octal literals are deprecated -- not all JS implementations will
@@ -5574,7 +5574,7 @@ namespace NUglify.JavaScript
                                 // the decimal value, and if it's the same, then we'll just treat it
                                 // as a normal decimal value. Otherwise we'll throw a warning and treat it
                                 // as a special no-convert literal.
-                                double decimalValue = (double)System.Convert.ToInt64(str, 10);
+                                double decimalValue = System.Convert.ToInt64(str, 10);
                                 if (decimalValue != doubleValue)
                                 {
                                     // throw a warning!
@@ -5642,7 +5642,7 @@ namespace NUglify.JavaScript
         /// <param name="str">string representation of a number</param>
         /// <param name="doubleValue">output value</param>
         /// <returns>true if there were no problems; false if there were</returns>
-        public bool ConvertBigIntLiteralToBigInteger(string str, out double bigIntegerValue)
+        public bool ConvertBigIntLiteralToBigInteger(string str, out BigInteger bigIntegerValue)
         {
             try
             {
@@ -5660,7 +5660,7 @@ namespace NUglify.JavaScript
                         }
 
                         // parse the number as a hex integer, converted to a double
-                        bigIntegerValue = (double)System.Convert.ToInt64(str, 16);
+                        bigIntegerValue = BigInteger.Parse(str, NumberStyles.AllowHexSpecifier);
                     }
                     else if (str[1] == 'o' || str[1] == 'O')
                     {
@@ -5672,7 +5672,7 @@ namespace NUglify.JavaScript
                         }
 
                         // parse the number as an octal integer without the prefix, converted to a double
-                        bigIntegerValue = (double)System.Convert.ToInt64(str.Substring(2), 8);
+                        bigIntegerValue = Convert.ToInt64(str.Substring(2), 8);
                     }
                     else if (str[1] == 'b' || str[1] == 'B')
                     {
@@ -5684,7 +5684,7 @@ namespace NUglify.JavaScript
                         }
 
                         // parse the number as a binary integer without the prefix, converted to a double
-                        bigIntegerValue = (double)System.Convert.ToInt64(str.Substring(2), 2);
+                        bigIntegerValue = Convert.ToInt64(str.Substring(2), 2);
                     }
                     else
                     {
@@ -5692,7 +5692,7 @@ namespace NUglify.JavaScript
                         // and if it fails, just convert to decimal
                         try
                         {
-                            bigIntegerValue = (double)System.Convert.ToInt64(str, 8);
+                            bigIntegerValue = Convert.ToInt64(str, 8);
                 
                             // if we got here, we successfully converted it to octal.
                             // now, octal literals are deprecated -- not all JS implementations will
@@ -5700,7 +5700,7 @@ namespace NUglify.JavaScript
                             // the decimal value, and if it's the same, then we'll just treat it
                             // as a normal decimal value. Otherwise we'll throw a warning and treat it
                             // as a special no-convert literal.
-                            double decimalValue = (double)System.Convert.ToInt64(str, 10);
+                            BigInteger decimalValue = Convert.ToInt64(str, 10);
                             if (decimalValue != bigIntegerValue)
                             {
                                 // throw a warning!
@@ -5715,14 +5715,14 @@ namespace NUglify.JavaScript
                         {
                             // ignore the format exception and fall through to parsing
                             // the value as a base-10 decimal value
-                            bigIntegerValue = Convert.ToDouble(str, CultureInfo.InvariantCulture);
+                            bigIntegerValue = BigInteger.Parse(str, CultureInfo.InvariantCulture);
                         }
                     }
                 }
                 else
                 {
                     // just parse the integer as a bigint value
-                    bigIntegerValue = double.Parse(str.TrimEnd('n'), CultureInfo.InvariantCulture);
+                    bigIntegerValue = BigInteger.Parse(str.TrimEnd('n'), CultureInfo.InvariantCulture);
                 }
                 
                 // if we got here, we should have an appropriate value in doubleValue
@@ -6004,18 +6004,9 @@ namespace NUglify.JavaScript
             get { return m_lookup; }
         }
 
-        private string m_name;
-        private ReferenceType m_type;
+        public string Name { get; private set; }
 
-        public string Name
-        {
-            get { return m_name; }
-        }
-
-        public ReferenceType ReferenceType
-        {
-            get { return m_type; }
-        }
+        public ReferenceType ReferenceType { get; private set; }
 
         public int Column
         {
@@ -6051,14 +6042,14 @@ namespace NUglify.JavaScript
         internal UndefinedReference(LookupExpression lookup, SourceContext context)
         {
             m_lookup = lookup;
-            m_name = lookup.Name;
-            m_type = lookup.RefType;
+            Name = lookup.Name;
+            ReferenceType = lookup.RefType;
             m_context = context;
         }
 
         public override string ToString()
         {
-            return m_name;
+            return Name;
         }
     }
 

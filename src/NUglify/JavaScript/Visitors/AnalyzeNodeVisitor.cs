@@ -1884,9 +1884,10 @@ namespace NUglify.JavaScript.Visitors
                         {
                             if (constArg.Value is string constArgStringValue)
                             {
-                                double bigInt;
-                                if (m_parser.ConvertBigIntLiteralToBigInteger(constArgStringValue, out bigInt))
-                                    node.Parent.ReplaceChild(node, new ConstantWrapper((long)bigInt + "n", PrimitiveType.Other, node.Arguments[0].Context));
+                                if (m_parser.ConvertBigIntLiteralToBigInteger(constArgStringValue, out var bigInt))
+                                    node.Parent.ReplaceChild(node, 
+                                        new ConstantWrapper((long)bigInt + "n", PrimitiveType.Other, 
+                                            node.Arguments[0].Context));
                                 
                                 return;
                             }
