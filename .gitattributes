@@ -1,0 +1,2 @@
+# Tests fail when EOL is set to LF because of string literals used in test code
+* eol=crlf
