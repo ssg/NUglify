@@ -38,6 +38,7 @@ namespace NUglify.Benchmarks
                 //BenchmarkRunner.Run<BenchMinifier>(config);
                 BenchmarkRunner.Run<BenchParser>(config);
             }
+#pragma warning disable CS0162 // Unreachable code detected
             else
             {
                 var program = new BenchMinifier();
@@ -57,6 +58,7 @@ namespace NUglify.Benchmarks
                 DumpGC(gc0, gc1, gc2);
 
             }
+#pragma warning restore CS0162 // Unreachable code detected
         }
 
         static void DumpGC(int gc0, int gc1, int gc2)
